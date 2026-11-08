@@ -387,6 +387,27 @@ body.light .glass{border-color:rgba(10,12,30,.09)}
 .abtn button.pr{background:var(--inv-bg);color:var(--inv-text);border-color:transparent}
 textarea.inp{min-height:150px;resize:vertical;font-size:14px;line-height:1.45}
 .flag{color:var(--warn);font-size:11px;margin-top:3px}
+/* ---------- панель владельца ---------- */
+.pstats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.pstats>div{padding:12px 14px;border-radius:16px}
+.pstats small{display:block;font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.pstats b{display:block;font-family:Unbounded,sans-serif;font-size:17px;margin-top:3px}
+.pstats span{font-size:11px;color:var(--muted)}
+.ptabs{margin:12px 0}.ptabs button{font-size:12px;padding-left:4px;padding-right:4px}
+.psearch,.prow{display:flex;gap:8px;align-items:center}
+.psearch{margin-bottom:10px}.psearch .inp,.prow .inp{flex:1;min-width:0}
+.psearch .btn,.prow .btn{width:auto;padding:0 16px;height:46px;flex:none}
+.prow+.prow{margin-top:6px}
+.prank{padding:10px 0;border-bottom:1px solid var(--line)}
+.pchk{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:12.5px;color:var(--muted)}
+.pnote{font-size:11.5px;color:var(--muted);margin:10px 4px;line-height:1.5}
+.pbadge{font-size:10px;font-weight:800;padding:2px 6px;border-radius:6px;background:var(--card2)}
+.pbadge.bad{color:var(--bad)}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:4px 0 6px}
+.pgrid div{background:var(--card2);border-radius:12px;padding:8px 10px}
+.pgrid small{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase}
+.pgrid b{display:block;font-size:15px;margin-top:2px}
+
 /* ---------- логотип и прозрачные звёзды/подарки на фоне ---------- */
 #splash .robot{visibility:hidden}
 #splash.nologo .robot{visibility:visible}
@@ -589,7 +610,8 @@ async function sync(){
   try{
     const d = await api("/api/me");
     S.balance=d.user.balance; S.spent=d.user.spent; S.cashback=d.user.cashback;
-    S.claimed={}; d.claimed.forEach(k=>S.claimed[k]=true); S.isAdmin=!!d.is_admin;
+    S.claimed={}; d.claimed.forEach(k=>S.claimed[k]=true); S.isAdmin=!!d.is_admin; S.panel=!!d.panel;
+    if (Array.isArray(d.ranks) && d.ranks.length) CONFIG.ranks=d.ranks.map(r=>({ru:r.ru,uz:r.uz||r.ru,min:r.min,reward:r.reward||undefined,badge:!!r.badge}));
     S.history=d.history.map(h=>({...h, title:histTitle(h)}));
     if (d.shop.star_price>0) CONFIG.starPrice=d.shop.star_price;
     Object.keys(d.shop.premium).forEach(m=>{ if(d.shop.premium[m]>0) CONFIG.premium[m]=d.shop.premium[m]; });
@@ -748,7 +770,7 @@ const rName = i => CONFIG.ranks[i][S.lang];
 /* Отметка Элиты — внутренняя отметка Drip Store, не верификация Telegram */
 const isElite = () => CONFIG.ranks.some((r,k)=>r.badge && S.spent>=r.min);
 const eliteBadge = (sz=16) => isElite() ? `<span class="eb" title="Drip Store Elite" style="width:${sz}px;height:${sz}px">${I.elite}</span>` : "";
-function rewardText(r){ return r.reward==="stars"?t("rw_stars"):r.reward==="stars150"?t("rw_stars150"):t("rw_nft"); }
+function rewardText(r){ return r.reward==="stars"?t("rw_stars"):r.reward==="stars150"?t("rw_stars150"):r.reward==="nft"?t("rw_nft"):(r.reward||""); }
 function rankCard(){
   const i=rankIdx(S.spent), R=CONFIG.ranks, nx=R[i+1];
   const pct = nx ? Math.min(100, (S.spent-R[i].min)/(nx.min-R[i].min)*100) : 100;
@@ -847,7 +869,8 @@ function profileView(){
     <button class="row tap" onclick="invite()"><div class="ri">${I.people}</div><div class="rt"><b>${t("invite")}</b><span>${t("invite_d")}</span></div><span class="chev">${I.chev}</span></button>
     <button class="row tap" onclick="openPromo()"><div class="ri">${I.tag}</div><div class="rt"><b>${t("promo")}</b><span>${t("promo_d")}</span></div><span class="chev">${I.chev}</span></button>
     <button class="row tap" onclick="openSupport()"><div class="ri">${I.headset}</div><div class="rt"><b>${t("support")}</b><span>${t("support_d")}</span></div><span class="chev">${I.chev}</span></button>
-    ${S.isAdmin?`<button class="row tap" onclick="go('gwadmin')"><div class="ri">${I.gift}</div><div class="rt"><b>${t("admin_gw")}</b><span>${t("admin_gw_d")}</span></div><span class="chev">${I.chev}</span></button>`:""}
+    ${S.panel?`<button class="row tap" onclick="go('panel')"><div class="ri">${I.crown}</div><div class="rt"><b>Панель владельца</b><span>Цены, карта, балансы, ранги, админы</span></div><span class="chev">${I.chev}</span></button>`:""}
+    ${S.isAdmin&&!S.panel?`<button class="row tap" onclick="go('gwadmin')"><div class="ri">${I.gift}</div><div class="rt"><b>${t("admin_gw")}</b><span>${t("admin_gw_d")}</span></div><span class="chev">${I.chev}</span></button>`:""}
   </div>
   <div class="cap">${t("settings")}</div>
   <div class="glass card">
@@ -1244,7 +1267,7 @@ async function loadGa(){
 function dtLocal(ms){ if(!ms) return ""; const d=new Date(ms); const p=n=>String(n).padStart(2,"0");
   return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; }
 function gwAdminView(){
-  const back=`<div class="title"><button class="back glass tap" onclick="go('profile')">${I.left}</button><div><h2>${t("admin_gw")}</h2><span style="font-size:12px;color:var(--muted)">${t("admin_gw_d")}</span></div></div>`;
+  const back=`<div class="title"><button class="back glass tap" onclick="go(S.panel?'panel':'profile')">${I.left}</button><div><h2>${t("admin_gw")}</h2><span style="font-size:12px;color:var(--muted)">${t("admin_gw_d")}</span></div></div>`;
   if(!GA) return back+`<div class="empty"><span class="spin"></span></div>`;
   return `${back}
   ${GA.channel_ok?`<div class="warn">${I.check}<span>Канал: <b>${esc(GA.channel_title)}</b></span></div>`:`<div class="warn">${I.alert}<span>Канал не подключён: впишите CHANNEL_ID в .env на сервере и сделайте бота админом канала.</span></div>`}
@@ -1321,11 +1344,164 @@ setInterval(()=>{
   });
 },1000);
 
+/* ===================== ПАНЕЛЬ ВЛАДЕЛЬЦА =====================
+   Видна только владельцу и назначенным админам. Сервер проверяет права на КАЖДОМ запросе. */
+let PN=null, PT="pend", PU=[], PQ="", PP=null, PR=null;
+const pErr=e=>toast(e&&e.status===403?"Нет доступа":({user_not_found:"Пользователь не найден"}[e&&e.message])||(e&&e.message&&!/^http_|^[a-z_]+$/.test(e.message)?e.message:t("err_generic")));
+const pNum=id=>{ const v=(document.getElementById(id).value||"").replace(/\s/g,""); return v===""?null:parseInt(v,10); };
+async function loadPanel(){
+  try{ PN=await api("/api/panel"); PR=PN.ranks.map(r=>({...r})); }catch(e){ pErr(e); }
+  if(view==="panel") render();
+  if(PT==="pend") loadPend(); if(PT==="users") loadUsers();
+}
+async function loadPend(){ try{ PP=(await api("/api/panel/pending")).items; }catch(e){ pErr(e); } if(view==="panel") render(); }
+async function loadUsers(){ try{ PU=(await api("/api/panel/users?q="+encodeURIComponent(PQ))).items; }catch(e){ pErr(e); } if(view==="panel") render(); }
+function pTab(x){ PT=x; haptic(); render(); if(x==="pend") loadPend(); if(x==="users") loadUsers(); }
+const pDate=ms=>ms?new Date(ms).toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"";
+const pWho=u=>`${esc(u.name||"—")}${u.username?" @"+esc(u.username):""} · ID ${u.tg}`;
+
+function panelView(){
+  const back=`<div class="title"><button class="back glass tap" onclick="go('profile')">${I.left}</button><div><h2>Панель владельца</h2><span style="font-size:12px;color:var(--muted)">Управление магазином</span></div></div>`;
+  if(!PN) return back+`<div class="empty"><span class="spin"></span></div>`;
+  const st=PN.stats;
+  const tabs=[["pend","Заявки"+(st.pending?` (${st.pending})`:"")],["users","Люди"],["shop","Цены"],["ranks","Ранги"],["admins","Админы"]];
+  return `${back}
+  <div class="pstats">
+    <div class="glass"><small>Пользователи</small><b>${fmt(st.users)}</b></div>
+    <div class="glass"><small>Заказы</small><b>${fmt(st.orders)}</b><span>${fmt(st.orders_sum)} сум</span></div>
+    <div class="glass"><small>Пополнено</small><b>${fmt(st.topups_sum)}</b><span>сум</span></div>
+    <div class="glass"><small>На балансах</small><b>${fmt(st.balances)}</b><span>сум</span></div>
+  </div>
+  <button class="wide glass tap" onclick="go('gwadmin')"><div class="wi">${I.gift}</div><div class="wt"><b>Розыгрыши</b><span>Создание, публикация, итоги</span></div><span class="chev">${I.chev}</span></button>
+  <div class="seg ptabs">${tabs.map(([k,n])=>`<button class="${PT===k?"on":""}" onclick="pTab('${k}')">${n}</button>`).join("")}</div>
+  ${({pend:pPend,users:pUsers,shop:pShop,ranks:pRanks,admins:pAdmins})[PT]()}`;
+}
+
+/* --- Заявки: пополнения, заказы, награды --- */
+function pPend(){
+  if(!PP) return `<div class="empty"><span class="spin"></span></div>`;
+  if(!PP.length) return `<div class="empty">${I.check}<b>Всё обработано</b>Новых заявок нет</div>`;
+  return `<div class="glass card adm">${PP.map(x=>{
+    const title = x.kind==="tp" ? `Пополнение #${x.id}: +${fmt(x.amount)} сум (${x.method==="uzcard"?"карта":"банкомат"})`
+      : x.kind==="or" ? `Заказ #${x.id}: ${x.product==="stars"?fmt(x.qty)+" Stars":"Premium "+x.qty+" мес."} → @${esc(x.recipient)} · ${fmt(x.amount)} сум`
+      : `Награда за ранг: ${esc(x.reward||"")}`;
+    return `<div class="row"><div class="ri">${x.kind==="tp"?I.wallet:x.kind==="or"?I.box:I.gift}</div><div class="rt"><b>${title}</b><span>${pWho(x.user)} · ${pDate(x.date)}</span></div>
+      <div class="abtn"><button class="pr" onclick="pDecideAsk('${x.kind}',${x.id},true)">${x.kind==="tp"?"Зачислить":x.kind==="or"?"Выполнено":"Выдано"}</button>
+      <button onclick="pDecideAsk('${x.kind}',${x.id},false)">Отклонить</button></div></div>`; }).join("")}</div>
+  <p class="pnote">Пополнение: «Зачислить» — только если деньги реально пришли на карту. Заказ: «Выполнено» — после отправки Stars/Premium. «Отклонить» заказ — деньги вернутся клиенту.</p>`;
+}
+function pDecideAsk(kind,id,ok){
+  pConfirm(ok?"Подтвердить заявку?":"Отклонить заявку?", `pDecide('${kind}',${id},${ok})`);
+}
+async function pDecide(kind,id,ok){
+  try{ await api(`/api/panel/decide/${kind}/${id}`,"POST",{ok}); notify(); toast(ok?"Готово":"Отклонено"); }
+  catch(e){ pErr(e); }
+  loadPend(); api("/api/panel").then(d=>{PN=d; render();}).catch(()=>{});
+}
+function pConfirm(q,action){
+  openSheet(`<div class="sh-title"><div class="ic ri">${I.alert}</div><div><h2>Подтверждение</h2><p>${q}</p></div></div>
+    <button class="btn" onclick="closeSheet();${action}">Да</button><button class="btn ghost" style="margin-top:8px" onclick="closeSheet()">Нет</button>`);
+}
+
+/* --- Пользователи --- */
+function pUsers(){
+  return `<div class="psearch"><input class="inp" id="pq" placeholder="@username, имя или Telegram ID" value="${esc(PQ)}" onkeydown="if(event.key==='Enter'){PQ=this.value;loadUsers()}">
+    <button class="btn" onclick="PQ=document.getElementById('pq').value;loadUsers()">Найти</button></div>
+  <div class="glass card">${PU.map(u=>`<button class="row tap" onclick="pUser(${u.tg})"><div class="ri">${I.userI}</div>
+    <div class="rt"><b>${esc(u.name||"—")}${u.username?" @"+esc(u.username):""}${u.admin?` · <span class="pbadge">${u.admin==="owner"?"владелец":"админ"}</span>`:""}${u.banned?' · <span class="pbadge bad">блок</span>':""}</b>
+    <span>ID ${u.tg} · ${fmt(u.balance)} сум · ${fmt(u.tokens)} ток. · ${esc(u.rank)}</span></div><span class="chev">${I.chev}</span></button>`).join("")||`<div class="row"><div class="rt"><span>Никого не найдено</span></div></div>`}</div>`;
+}
+function pUser(tg){
+  const u=PU.find(x=>x.tg===tg); if(!u) return;
+  const ranksHint=CONFIG.ranks.map(r=>`${esc(r[S.lang]||r.ru)} — от ${fmt(r.min)}`).join(" · ");
+  openSheet(`<div class="sh-title"><div class="ic ri">${I.userI}</div><div><h2>${esc(u.name||"—")}</h2><p>${u.username?"@"+esc(u.username)+" · ":""}ID ${u.tg}</p></div></div>
+  <div class="pgrid"><div><small>Баланс</small><b>${fmt(u.balance)}</b></div><div><small>Токены</small><b>${fmt(u.tokens)}</b></div>
+    <div><small>Покупки</small><b>${fmt(u.spent)}</b></div><div><small>Ранг</small><b>${esc(u.rank)}</b></div></div>
+  <div class="lbl2">Баланс, сум: «500000» — начислить, «-500000» — списать</div>
+  <div class="prow"><input class="inp" id="pb" inputmode="numeric" placeholder="+ / − сумма"><button class="btn" onclick="pAct(${tg},'balance')">OK</button></div>
+  <input class="inp" id="pbr" placeholder="Причина (увидит пользователь)" style="margin-top:6px">
+  <div class="lbl2">Игровые токены: «100» — дать, «-100» — забрать</div>
+  <div class="prow"><input class="inp" id="pt" inputmode="numeric" placeholder="+ / − токены"><button class="btn" onclick="pAct(${tg},'tokens')">OK</button></div>
+  <div class="lbl2">Сумма покупок (от неё зависит ранг)</div>
+  <div class="prow"><input class="inp" id="ps" inputmode="numeric" value="${u.spent}"><button class="btn" onclick="pAct(${tg},'spent')">OK</button></div>
+  <p class="pnote">${ranksHint}</p>
+  ${u.admin==="owner"?"":`<button class="btn ghost" style="margin-top:12px" onclick="pAct(${tg},'ban',${!u.banned})">${u.banned?"Разблокировать":"Заблокировать"}</button>`}
+  ${PN.is_owner&&u.admin!=="owner"?`<button class="btn ghost" style="margin-top:8px" onclick="pConfirm('${u.admin?"Снять права администратора?":"Дать полные права администратора? Он сможет менять цены, карту и балансы."}','pAct(${tg},\\'admin\\',${!u.admin})')">${u.admin?"Снять админа":"Сделать админом"}</button>`:""}`);
+}
+async function pAct(tg,what,flag){
+  let body;
+  if(what==="balance"){ const d=pNum("pb"); if(!d){ toast("Введите сумму"); return; } body={delta:d,reason:document.getElementById("pbr").value}; }
+  else if(what==="tokens"){ const d=pNum("pt"); if(!d){ toast("Введите количество"); return; } body={delta:d}; }
+  else if(what==="spent"){ const v=pNum("ps"); if(v===null||v<0){ toast("Введите сумму"); return; } body={value:v}; }
+  else body={on:!!flag};
+  try{ const u=await api(`/api/panel/users/${tg}/${what}`,"POST",body); notify(); toast("Сохранено");
+    const i=PU.findIndex(x=>x.tg===tg); if(i>=0) PU[i]=u; else PU.unshift(u);
+    if(what==="admin") loadPanel(); render(); pUser(tg); }
+  catch(e){ pErr(e); }
+}
+
+/* --- Цены, карта, магазин, токены --- */
+function pShop(){
+  const s=PN.settings;
+  const f=(id,l,v,ph="")=>`<div class="lbl2">${l}</div><input class="inp" id="${id}" inputmode="numeric" value="${v??""}" placeholder="${ph}">`;
+  return `<div class="glass card" style="padding:14px">
+    ${f("s_star","Цена 1 Telegram Star, сум",s.star_price)}
+    ${f("s_p3","Premium 3 мес., сум",s.premium_3)}${f("s_p6","Premium 6 мес., сум",s.premium_6)}${f("s_p12","Premium 12 мес., сум",s.premium_12)}
+    ${f("s_daily","Ежедневные игровые токены",s.daily_tokens)}
+    <div class="lbl2">Номер карты для пополнения</div><input class="inp" id="s_card" inputmode="numeric" value="${esc(s.card_number)}" placeholder="8600 0000 0000 0000">
+    <div class="lbl2">Имя владельца карты</div><input class="inp" id="s_holder" value="${esc(s.card_holder)}" placeholder="IMYA FAMILIYA">
+    <label class="pchk"><input type="checkbox" id="s_open" ${s.shop_open?"checked":""}> Магазин открыт (выключите, чтобы временно остановить заказы)</label>
+    <button class="btn" style="margin-top:14px" onclick="pShopSave()">Сохранить</button>
+  </div><p class="pnote">О каждом изменении цен и карты бот сообщит всем администраторам.</p>`;
+}
+function pShopSave(){
+  const s=PN.settings, card=document.getElementById("s_card").value.replace(/\D/g,"");
+  const body={star_price:pNum("s_star"),premium_3:pNum("s_p3"),premium_6:pNum("s_p6"),premium_12:pNum("s_p12"),daily_tokens:pNum("s_daily"),
+    card_number:document.getElementById("s_card").value,card_holder:document.getElementById("s_holder").value,shop_open:document.getElementById("s_open").checked};
+  if(card && card.length!==16){ toast("Номер карты — 16 цифр"); return; }
+  const go2=async()=>{ try{ const d=await api("/api/panel/settings","POST",body); notify(); toast(d.changed?"Сохранено":"Изменений нет"); await loadPanel(); sync(); }catch(e){ pErr(e); } };
+  if(card!==s.card_number.replace(/\D/g,"")){ window.__pgo=go2; pConfirm("Сменить карту для оплаты? Клиенты будут переводить деньги на новую карту.","window.__pgo()"); }
+  else go2();
+}
+
+/* --- Ранги --- */
+function pRanks(){
+  return `<div class="glass card" style="padding:12px">${PR.map((r,i)=>`<div class="prank">
+    <div class="prow"><b style="min-width:22px">${i+1}</b><input class="inp" value="${esc(r.ru)}" placeholder="Название (рус)" oninput="PR[${i}].ru=this.value">
+      <input class="inp" value="${esc(r.uz||"")}" placeholder="Nomi (uz)" oninput="PR[${i}].uz=this.value"></div>
+    <div class="prow"><input class="inp" inputmode="numeric" value="${r.min}" ${i===0?"disabled":""} placeholder="Порог, сум" oninput="PR[${i}].min=parseInt(this.value.replace(/\\s/g,''))||0">
+      <input class="inp" value="${esc(r.reward||"")}" placeholder="Награда (пусто — нет)" oninput="PR[${i}].reward=this.value"></div>
+    <label class="pchk"><input type="checkbox" ${r.badge?"checked":""} onchange="PR[${i}].badge=this.checked"> Значок «Элита»</label></div>`).join("")}
+    <div class="abtn"><button onclick="PR.push({ru:'',uz:'',min:(PR[PR.length-1].min||0)+100000,reward:'',badge:false});render()">+ Ранг</button>
+      ${PR.length>1?`<button onclick="PR.pop();render()">− Последний</button>`:""}</div>
+    <button class="btn" style="margin-top:12px" onclick="pRanksSave()">Сохранить ранги</button></div>
+  <p class="pnote">Порог — сумма покупок, с которой начинается ранг. Первый ранг всегда с 0. Не меняйте порядок рангов, за которые уже выдавали награды.</p>`;
+}
+async function pRanksSave(){
+  try{ const d=await api("/api/panel/ranks","POST",{ranks:PR}); PN.ranks=d.ranks; PR=d.ranks.map(r=>({...r})); notify(); toast("Ранги сохранены"); sync(); }
+  catch(e){ pErr(e); }
+}
+
+/* --- Админы --- */
+function pAdmins(){
+  return `<div class="glass card">${PN.admins.map(a=>`<div class="row"><div class="ri">${I.userI}</div><div class="rt"><b>${esc(a.name||"—")}${a.username?" @"+esc(a.username):""}</b>
+    <span>ID ${a.tg} · ${a.owner?"владелец (.env)":"админ"}</span></div>
+    ${PN.is_owner&&!a.owner?`<div class="abtn" style="width:auto;margin:0"><button onclick="pConfirm('Снять права администратора?','pAdminSet(${a.tg},false)')">Снять</button></div>`:""}</div>`).join("")}</div>
+  ${PN.is_owner?`<div class="lbl2">Дать полные права (Telegram ID; человек должен хотя бы раз открыть бота)</div>
+  <div class="prow"><input class="inp" id="pa" inputmode="numeric" placeholder="123456789"><button class="btn" onclick="const v=pNum('pa'); if(v) pConfirm('Дать полные права администратора ID '+v+'?','pAdminSet('+v+',true)')">Дать</button></div>
+  <p class="pnote">Админ может всё, что и вы, кроме назначения других админов. Свой ID человек узнает командой /myid в боте.</p>`
+  :`<p class="pnote">Назначать администраторов может только владелец.</p>`}`;
+}
+async function pAdminSet(tg,on){
+  try{ await api(`/api/panel/users/${tg}/admin`,"POST",{on}); notify(); toast(on?"Права выданы":"Права сняты"); loadPanel(); }
+  catch(e){ pErr(e); }
+}
+
 /* ===== РЕНДЕР ===== */
 function render(){
-  const V={home:homeView,rating:ratingView,games:gamesView,topup:topupView,history:historyView,profile:profileView,giveaway:giveawayView,gwadmin:gwAdminView}[view]||homeView;
+  const V={home:homeView,rating:ratingView,games:gamesView,topup:topupView,history:historyView,profile:profileView,giveaway:giveawayView,gwadmin:gwAdminView,panel:panelView}[view]||homeView;
   document.getElementById("app").innerHTML=`<div class="view">${V()}</div>`;
-  const navView = (view==="rating"||view==="giveaway") ? "home" : view==="gwadmin" ? "profile" : view;
+  const navView = (view==="rating"||view==="giveaway") ? "home" : (view==="gwadmin"||view==="panel") ? "profile" : view;
   document.getElementById("nav").innerHTML=[["home",I.home],["games",I.game],["topup",I.wallet],["history",I.clock,"orders"],["profile",I.userI]]
     .map(([v,ic,lbl])=>`<button class="${v==="topup"?"mid ":""}${navView===v?"on":""}" onclick="go('${v}')">${ic}${t(lbl||v)}</button>`).join("");
   updateBack();
@@ -1338,19 +1514,20 @@ function go(v){
   liquid(()=>{ view=v; render(); onEnter(v); });
 }
 /* Данные экрана загружаются с сервера при входе */
-function onEnter(v){ if(v==="games") loadGames(); if(v==="giveaway") loadGw(); if(v==="home") loadGw(true); if(v==="gwadmin") loadGa(); }
+function onEnter(v){ if(v==="games") loadGames(); if(v==="giveaway") loadGw(); if(v==="home") loadGw(true); if(v==="panel") loadPanel(); if(v==="gwadmin") loadGa(); }
 function setLang(l){ S.lang=l; save(); haptic(); render(); }
 function toggle(k){ S[k]=!S[k]; save(); applyTheme(); haptic(); render(); }
 
 /* ===== КНОПКА «НАЗАД» TELEGRAM ===== */
 function sheetOpen(){ return document.getElementById("sheet").classList.contains("on"); }
 function gameOpen(){ return document.getElementById("game").classList.contains("on"); }
-function canBack(){ return gameOpen() || sheetOpen() || view==="rating" || view==="giveaway" || view==="gwadmin" || (view==="topup" && TS.step!=="method"); }
+function canBack(){ return gameOpen() || sheetOpen() || view==="rating" || view==="giveaway" || view==="gwadmin" || view==="panel" || (view==="topup" && TS.step!=="method"); }
 function doBack(){
   if (gameOpen()) closeGame();
   else if (sheetOpen()) closeSheet();
   else if (view==="rating" || view==="giveaway") go("home");
-  else if (view==="gwadmin") go("profile");
+  else if (view==="gwadmin") go(S.panel?"panel":"profile");
+  else if (view==="panel") go("profile");
   else if (view==="topup" && TS.step!=="method") topBack();
 }
 function updateBack(){ try{ if(!tg) return; canBack()?tg.BackButton.show():tg.BackButton.hide(); }catch(e){} }
@@ -1705,7 +1882,7 @@ document.title=CONFIG.shopName;
 document.getElementById("splashName").textContent=CONFIG.shopName;
 /* Ссылки из бота: ...#giveaway — страница розыгрыша, ...#gwadmin — управление розыгрышами */
 const startHash=(location.hash||"").replace("#","");
-if (["giveaway","gwadmin","games"].includes(startHash)) view=startHash;
+if (["giveaway","gwadmin","games","panel"].includes(startHash)) view=startHash;
 initGifts(); applyTheme(); render(); sync(); onEnter(view); if(view!=="home") loadGw(true);
 setTimeout(()=>document.getElementById("splash").classList.add("hide"), S.noanim?400:1900);
 </script>
