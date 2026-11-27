@@ -113,6 +113,8 @@ body.light .glass{background:var(--card);box-shadow:0 6px 20px rgba(10,12,30,.06
 .pc .t{font-weight:800;font-size:14.5px;margin-top:16px}
 .pc .d{font-size:11.5px;color:var(--muted);margin-top:3px}
 .pc .chev{position:absolute;right:14px;top:50%;margin-top:-9px}
+.pcw{width:100%;margin-top:12px;min-height:0;flex-direction:row;align-items:center;gap:14px}
+.pcw .ic{margin-bottom:0;flex:none;display:flex;align-items:center;justify-content:center}.pcw .ic svg{width:40px;height:40px}.pcw .t{margin-top:0}
 .badge{position:absolute;top:12px;right:12px;font-size:9px;font-weight:800;letter-spacing:1px;padding:4px 7px;border-radius:7px;background:var(--inv-bg);color:var(--inv-text)}
 .wide{display:flex;align-items:center;gap:14px;padding:16px;margin-top:12px;width:100%;text-align:left}
 .wide .wi{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--card2);flex-shrink:0}
@@ -382,6 +384,16 @@ nav button.mid.on svg{filter:none}
 .pk button b{display:block;font-size:15px}.pk button span{font-size:11px;color:var(--muted)}
 .pk button.on,.pm button.on{border-color:rgba(255,255,255,.7);box-shadow:0 0 18px rgba(255,255,255,.15);background:rgba(255,255,255,.07)}
 .pm{display:flex;flex-direction:column;gap:8px}
+.pk button{position:relative}.pk .tg{position:absolute;top:-7px;right:-5px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--inv-bg);color:var(--inv-text);font-style:normal}.pk .tg svg{width:12px;height:12px}
+.nt{display:flex;gap:10px;align-items:flex-start}.nt i{flex:none;display:flex;margin-top:1px}.nt i svg{width:17px;height:17px}
+.upb{display:flex;align-items:center;justify-content:center;gap:8px}.upb svg{width:16px;height:16px}
+.psninfo{font-size:13px;line-height:1.45;color:var(--muted);margin:4px 2px 0}
+.psnwarn{margin-top:14px;padding:12px 14px;border-radius:14px;font-size:12.5px;line-height:1.45;background:rgba(255,159,10,.10);border:1px solid rgba(255,159,10,.35)}
+.upsell{margin-top:12px;padding:12px 14px;border-radius:14px;font-size:13px;line-height:1.45;background:var(--card);border:1px solid var(--line)}
+.psnhow{display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:8px;padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--line);font-size:13.5px;font-weight:700;text-align:left}.psnhow .chev svg{width:16px;height:16px}
+.gs{display:flex;gap:12px;margin-top:12px}.gs .gn{flex:none;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--inv-bg);color:var(--inv-text);font-size:13px}
+.gs p,.gcard p{font-size:13px;line-height:1.45;color:var(--muted);margin:3px 0 0}.gcard{padding:14px 16px;display:block}.gcard b{display:block}.gcard p{margin-bottom:10px}.gcard p:last-child{margin-bottom:0}
+.chk{display:flex;gap:10px;align-items:center;margin-top:12px;font-size:14px;font-weight:600}.chk input{width:20px;height:20px;accent-color:#fff}
 .pm button{display:flex;justify-content:space-between;align-items:center;padding:16px;border-radius:16px;background:var(--card);border:1px solid var(--line);font-size:15px;font-weight:700}
 .pm button span{color:var(--muted);font-size:13px}
 .total{display:flex;justify-content:space-between;align-items:center;margin:20px 2px 14px;font-size:14px;color:var(--muted)}
@@ -571,6 +583,8 @@ const CONFIG = {
   minStars: 50, maxStars: 100000,
   starPacks: [50, 100, 250, 500, 1000, 2500],
   premium: { 3: 165000, 6: 220000, 12: 395000 },   // ПРИМЕРНЫЕ цены
+  // PlayStation Store (Турция): [{try, price, tag, up}] — в живом режиме приходит с сервера (/api/me → shop.psn)
+  psn: [{try:500,price:170000,tag:""},{try:1000,price:300000,tag:""},{try:2000,price:630000,tag:"hot",up:{to:2500,add:500,extra:70000,alone:170000}},{try:2500,price:700000,tag:""},{try:5000,price:1350000,tag:"best"}],
   minTopup: 5000,
   card: { number: "8600 0000 0000 0000", holder: "ISM FAMILIYA" },  // ваша карта Humo
   autoPay: false,                   // станет true на этапе E (автозачисление)                    // true = зелёная точка «зачисляется автоматически»
@@ -649,6 +663,48 @@ Object.assign(T.uz,{gw_live:"Davom etmoqda",gw:"Konkurs",gw_d:"Do'stlarni taklif
 
 /* ===== ТЕКСТЫ: игры ===== */
 Object.assign(T.ru,{tokens:"Игровые токены",tokens_d:"Токены нельзя купить или вывести. Копите их: 1000 токенов = скидка на Stars и Premium.",daily_get:"Забрать 15",daily_next:"Следующие через",daily_ok:"+15 токенов",bet:"Ставка",mines_n:"Мины",opened:"Открыто",coef:"Коэфф.",payout:"Выплата",cashout:"Забрать",start_game:"Играть",win:"Выигрыш",lose:"Мина! Ставка проиграна",crashed:"Взрыв на",cashed:"Забрано на",rules:"Правила",history_g:"История игр",no_games:"Пока нет игр",mines_rules:"Поле 5×5. Выберите ставку и число мин. Каждая открытая ячейка без мины увеличивает коэффициент. Мина — ставка сгорает. «Забрать» — получить ставку × коэффициент. Положение мин выбирает сервер до начала раунда и не показывает его, пока раунд не закончится. Коэффициенты честные: в среднем игра возвращает 96% ставок.",rocket_rules:"Одна ракета для всех. 7 секунд на ставки, потом взлёт — множитель растёт с 1.00x. В случайный момент ракета взрывается. Успейте нажать «Забрать» — получите ставку × множитель. Точку взрыва сервер выбирает заранее и не показывает до конца раунда.",odds:"Вероятность долететь до коэффициента",fun_only:"Играйте, выполняйте задания и копите токены на скидку.",next_coef:"След.",low_tokens:"Недостаточно токенов",round_active:"Сначала закончите текущий раунд",bad_bet:"Ставка от 2 токенов",open_first:"Сначала откройте хотя бы одну ячейку",launch:"Запустить",flying:"Летим…",game_mines:"Drip Mines",game_rocket:"Drip Rocket",g_sd:"Drip Dash",g_cl:"Drip Climb",g_cl_d:"Qozonda tog'ga chiq. Nazorat nuqtalarisiz",g_cl:"Drip Climb",g_cl_d:"Лезь на гору в казане. Без чекпоинтов",g_sd_d:"Лети и не падай — бесплатно",hint_sd:"Нажимай, чтобы ракета взлетала"});
+Object.assign(T.ru,{psn_d:"Турция · пополнение в лирах",psn_info:"Код пополнения кошелька PlayStation Store в <b>турецких лирах (₺ TRY)</b>. Номинал — сколько лир придёт на кошелёк PSN, оплата — в сумах. Код придёт в бота.",psn_warn:"Код работает <b>только на аккаунте региона Турция</b>. На аккаунт другой страны он не активируется, возврата за активированный код нет.",psn_nom:"Номинал",psn_region:"Мой аккаунт PlayStation — регион Турция",psn_need_region:"Подтвердите, что аккаунт — регион Турция",psn_code:"Код придёт в бота после подтверждения оператором.",psn_up:"Доплатите всего <b>{extra}</b> и получите <b>{to} ₺</b> — на {add} ₺ больше. Отдельно {add} ₺ стоят {alone}.",psn_upbtn:"Взять {to} ₺ за +{extra}",
+  psn_how:"Нет турецкого аккаунта? Как создать",pg_title:"Турецкий аккаунт PSN",pg_sub:"5 минут, бесплатно",
+  pg_intro:"Регион у аккаунта PlayStation сменить нельзя, но можно создать <b>второй аккаунт с регионом Турция</b>. Основной аккаунт остаётся как был: игры, сохранения, трофеи и друзья никуда не денутся.",
+  pg_1h:"Новая почта",pg_1:"Нужен email, на который ещё нет аккаунта PlayStation. Подойдёт любой новый Gmail.",
+  pg_2h:"Создайте аккаунт",pg_2:"На консоли: «Добавить пользователя» → «Создать учётную запись». Или на сайте playstation.com → «Создать учётную запись».",
+  pg_3h:"Страна — Турция",pg_3:"При создании выберите страну <b>Турция (Türkiye)</b>, язык можно русский или английский. Возраст укажите 18+, иначе будут ограничения детского аккаунта. В адресе — любой город Турции, например İstanbul.",
+  pg_4h:"Активируйте код",pg_4:"Войдите в турецкий аккаунт → PlayStation Store → «Активировать код» и введите код из бота. Лиры появятся на кошельке.",
+  pg_play:"Как играть со своего основного аккаунта",
+  pg_ps5:"Войдите в турецкий аккаунт → Настройки → Пользователи и учётные записи → Другое → «Общий доступ к консоли и офлайн-игра» → Включить. Теперь игры с турецкого аккаунта доступны на консоли всем пользователям — играйте со своего основного, прогресс и трофеи сохраняются на нём.",
+  pg_ps4:"Войдите в турецкий аккаунт → Настройки → Управление учётной записью → «Активировать как основную систему PS4» → Активировать.",
+  pg_ok:"Несколько аккаунтов на одной консоли — обычная функция PlayStation, так делают очень многие игроки. Ваш основной аккаунт это никак не затрагивает.",
+  pg_back:"Понятно, к покупке",
+  pr_title:"Как активировать код",pr_sub:"PlayStation Store · Турция",
+  pr_intro:"Код из бота — 12 символов, например <b>XXXX-XXXX-XXXX</b>. Активируйте его, <b>войдя в турецкий аккаунт</b>: на аккаунте другой страны код не сработает. Лиры сразу появятся на кошельке.",
+  pr_web_h:"На сайте (проще всего)",pr_web:"1. Откройте store.playstation.com и войдите в турецкий аккаунт.<br>2. Нажмите на аватар вверху справа → «Погасить коды» (Redeem Codes).<br>3. Вставьте код и подтвердите.",
+  pr_open:"Открыть store.playstation.com",
+  pr_ps5:"PlayStation Store → кнопка «…» вверху справа → «Погасить код» → введите код.",
+  pr_ps4:"PlayStation Store → в меню слева, в самом низу, «Погасить коды» → введите код.",
+  pr_app:"Вкладка PlayStation Store → меню (три полоски) → «Погасить код» → введите код.",
+  pr_err:"Пишет «код недействителен»? Проверьте, что вошли именно в турецкий аккаунт, и что код введён без ошибок (буква O и ноль, I и единица). Не получается — напишите в поддержку, поможем.",
+  pr_done:"Понятно"});
+Object.assign(T.uz,{psn_d:"Turkiya · lirada to'ldirish",psn_info:"PlayStation Store hamyonini <b>turk lirasida (₺ TRY)</b> to'ldirish kodi. Nominal — PSN hamyoniga qancha lira tushadi, to'lov — so'mda. Kod botga keladi.",psn_warn:"Kod <b>faqat Turkiya regionidagi akkauntda</b> ishlaydi. Boshqa davlat akkauntida faollashmaydi, faollashtirilgan kod uchun pul qaytarilmaydi.",psn_nom:"Nominal",psn_region:"PlayStation akkauntim — Turkiya regioni",psn_need_region:"Akkaunt Turkiya regionida ekanini tasdiqlang",psn_code:"Kod operator tasdiqlagach botga keladi.",psn_up:"Yana atigi <b>{extra}</b> to'lang va <b>{to} ₺</b> oling — {add} ₺ ko'proq. Alohida {add} ₺ narxi {alone}.",psn_upbtn:"{to} ₺ ni olish (+{extra})",
+  psn_how:"Turk akkauntingiz yo'qmi? Qanday ochish",pg_title:"Turk PSN akkaunti",pg_sub:"5 daqiqa, bepul",
+  pg_intro:"PlayStation akkauntining regionini o'zgartirib bo'lmaydi, lekin <b>Turkiya regionidagi ikkinchi akkaunt</b> ochish mumkin. Asosiy akkauntingiz o'zgarmaydi: o'yinlar, saqlanishlar, kuboklar va do'stlar joyida qoladi.",
+  pg_1h:"Yangi pochta",pg_1:"PlayStation akkaunti hali ochilmagan email kerak. Istalgan yangi Gmail mos keladi.",
+  pg_2h:"Akkaunt oching",pg_2:"Konsolda: «Foydalanuvchi qo'shish» → «Akkaunt yaratish». Yoki playstation.com saytida → «Akkaunt yaratish».",
+  pg_3h:"Davlat — Turkiya",pg_3:"Yaratishda <b>Turkiya (Türkiye)</b> davlatini tanlang, tilni rus yoki ingliz qilsa bo'ladi. Yoshni 18+ ko'rsating, aks holda bolalar akkaunti cheklovlari bo'ladi. Manzilda — Turkiyaning istalgan shahri, masalan İstanbul.",
+  pg_4h:"Kodni faollashtiring",pg_4:"Turk akkauntiga kiring → PlayStation Store → «Kodni faollashtirish» va botdagi kodni kiriting. Liralar hamyonga tushadi.",
+  pg_play:"Asosiy akkauntingizdan qanday o'ynash",
+  pg_ps5:"Turk akkauntiga kiring → Sozlamalar → Foydalanuvchilar va akkauntlar → Boshqa → «Konsolni ulashish va oflayn o'yin» → Yoqish. Endi turk akkauntidagi o'yinlar konsoldagi barcha foydalanuvchilarga ochiq — asosiy akkauntingizdan o'ynang, natija va kuboklar unda saqlanadi.",
+  pg_ps4:"Turk akkauntiga kiring → Sozlamalar → Akkauntni boshqarish → «Asosiy PS4 sifatida faollashtirish» → Faollashtirish.",
+  pg_ok:"Bitta konsolda bir nechta akkaunt — PlayStation'ning oddiy funksiyasi, juda ko'p o'yinchilar shunday qiladi. Asosiy akkauntingizga hech qanday ta'sir qilmaydi.",
+  pg_back:"Tushunarli, xaridga",
+  pr_title:"Kodni qanday faollashtirish",pr_sub:"PlayStation Store · Turkiya",
+  pr_intro:"Botdagi kod — 12 belgi, masalan <b>XXXX-XXXX-XXXX</b>. Uni <b>turk akkauntiga kirib</b> faollashtiring: boshqa davlat akkauntida kod ishlamaydi. Liralar darhol hamyonga tushadi.",
+  pr_web_h:"Saytda (eng osoni)",pr_web:"1. store.playstation.com saytini oching va turk akkauntiga kiring.<br>2. Yuqori o'ngdagi avatarni bosing → «Kodlarni faollashtirish» (Redeem Codes).<br>3. Kodni kiriting va tasdiqlang.",
+  pr_open:"store.playstation.com ni ochish",
+  pr_ps5:"PlayStation Store → yuqori o'ngdagi «…» tugmasi → «Kodni faollashtirish» → kodni kiriting.",
+  pr_ps4:"PlayStation Store → chap menyuning eng pastida «Kodlarni faollashtirish» → kodni kiriting.",
+  pr_app:"PlayStation Store bo'limi → menyu (uch chiziq) → «Kodni faollashtirish» → kodni kiriting.",
+  pr_err:"«Kod yaroqsiz» deyaptimi? Aynan turk akkauntiga kirganingizni va kod xatosiz kiritilganini tekshiring (O harfi va nol, I va bir). Bo'lmasa — yordamga yozing, yordam beramiz.",
+  pr_done:"Tushunarli"});
 Object.assign(T.uz,{tokens:"O'yin tokenlari",tokens_d:"Tokenlarni sotib olish yoki yechib olish mumkin emas. To'plang: 1000 token = Stars va Premium'ga chegirma.",daily_get:"15 ta olish",daily_next:"Keyingisi",daily_ok:"+15 token",bet:"Tikish",mines_n:"Minalar",opened:"Ochildi",coef:"Koeff.",payout:"To'lov",cashout:"Olish",start_game:"O'ynash",win:"Yutuq",lose:"Mina! Tikish yutqazildi",crashed:"Portladi:",cashed:"Olindi:",rules:"Qoidalar",history_g:"O'yinlar tarixi",no_games:"Hali o'yinlar yo'q",mines_rules:"5×5 maydon. Tikish va minalar sonini tanlang. Minasiz har bir ochilgan katak koeffitsientni oshiradi. Mina — tikish yonadi. «Olish» — tikish × koeffitsient. Minalar joyini server raund boshlanishidan oldin tanlaydi va raund tugaguncha ko'rsatmaydi. Koeffitsientlar halol: o'rtacha 96% qaytadi.",rocket_rules:"Hamma uchun bitta raketa. 7 soniya tikish uchun, keyin uchish — ko'paytiruvchi 1.00x dan o'sadi. Tasodifiy paytda raketa portlaydi. «Olish»ni bosishga ulguring — tikish × ko'paytiruvchi. Portlash nuqtasini server oldindan tanlaydi.",odds:"Koeffitsientgacha uchish ehtimoli",fun_only:"O'ynang, vazifalarni bajaring va chegirma uchun token to'plang.",next_coef:"Keyingi",low_tokens:"Tokenlar yetarli emas",round_active:"Avval joriy raundni tugating",bad_bet:"Tikish 2 tokendan",open_first:"Avval kamida bitta katakni oching",launch:"Uchirish",flying:"Uchyapmiz…",game_mines:"Drip Mines",game_rocket:"Drip Rocket",g_sd:"Drip Dash",g_sd_d:"Uching va qulamang — bepul",hint_sd:"Raketa ko'tarilishi uchun bosing"});
 
 /* ===== TELEGRAM ===== */
@@ -693,6 +749,7 @@ function apiErr(e){
 function histTitle(h){
   if (h.kind==="stars") return `${fmt(h.qty)} ${t("stars_w")}`;
   if (h.kind==="premium") return `Premium ${h.qty} ${t("months")}`;
+  if (h.kind==="psn") return `PlayStation Store · ${fmt(h.qty)} ₺`;
   if (h.kind==="reward") return `${t("reward")}: ${rewardText(CONFIG.ranks[h.rank]||{})}`;
   if (h.kind==="game") return `${h.game==="mines"?"Mines":"Rocket"} · ${h.bet} → ${h.payout}${h.payout?` (${h.multiplier}x)`:""}`;
   if (h.kind==="prize") return `${t("prize")}: ${h.place} ${t("gw_place")}${h.prize?" — "+h.prize:""}`;
@@ -710,6 +767,10 @@ async function sync(){
     if (d.shop.star_price>0) CONFIG.starPrice=d.shop.star_price;
     Object.keys(d.shop.premium).forEach(m=>{ if(d.shop.premium[m]>0) CONFIG.premium[m]=d.shop.premium[m]; });
     CONFIG.autoPay=d.shop.auto_pay; CONFIG.pricesReady=d.shop.star_price>0;
+    // каталог PSN: только числа и известные метки — данные идут в onclick/HTML
+    const num=v=>Math.max(0,Math.floor(Number(v)||0));
+    CONFIG.psn=(Array.isArray(d.shop.psn)?d.shop.psn:[]).map(x=>({try:num(x.try),price:num(x.price),tag:["best","hot"].includes(x.tag)?x.tag:"",
+      up:x.up?{to:num(x.up.to),add:num(x.up.add),extra:num(x.up.extra),alone:num(x.up.alone)}:null})).filter(x=>x.try>0&&x.price>0);
     render();
   }catch(e){ apiErr(e); }
 }
@@ -740,6 +801,9 @@ const I = {
  headset:sv('<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="2.5" y="13" width="5" height="7" rx="2"/><rect x="16.5" y="13" width="5" height="7" rx="2"/><path d="M19 20a3 3 0 0 1-3 2h-2"/>'),
  playc:sv('<rect x="2.5" y="4.5" width="19" height="15" rx="4"/><path d="M10 9l5 3-5 3z"/>'),
  bolt:sv('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'),
+ fire:sv('<path d="M12 22c3.9 0 7-2.6 7-6.6 0-3.4-2.2-5.8-3.9-7.6-.3 1.9-1.3 3.2-2.5 3.8.2-3.4-1.4-6.4-4.1-8.6.1 3.6-2.3 5.6-3.4 7.9A7.3 7.3 0 0 0 5 15.4C5 19.4 8.1 22 12 22z"/>'),
+ trend:sv('<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>'),
+ up:sv('<path d="M12 19V5M6 11l6-6 6 6"/>',2.2),
  sun:sv('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),
  drop:sv('<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>'),
  box:sv('<path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/>',1.4),
@@ -909,9 +973,9 @@ function homeView(){
     <button class="pc glass tap" onclick="openStars()"><span class="badge">AUTO</span><div class="ic">${prodIcon("stars")}</div><div class="t">Telegram Stars</div><div class="d">${t("stars_d")}</div></button>
     <button class="pc glass tap" onclick="openPremium()"><span class="badge">AUTO</span><div class="ic">${prodIcon("premium")}</div><div class="t">Telegram Premium</div><div class="d">${t("prem_d")}</div></button>
   </div>
+  <button class="pc pcw glass tap" onclick="openPsn()"${CONFIG.psn.length?"":` style="opacity:.75"`}><span class="badge">${CONFIG.psn.length?"TR":t("soon")}</span><div class="ic">${I.game}</div><div><div class="t">PlayStation Store</div><div class="d">${t("psn_d")}</div></div></button>
   <button class="wide glass tap" onclick="go('giveaway')"><div class="wi">${I.gift}</div><div class="wt"><b>${t("gw")}</b>${gwLive()||`<span>${t("gw_d")}</span>`}</div><span class="chev">${I.chev}</span></button>
-  <button class="wide glass tap" onclick="go('rating')"><div class="wi">${I.trophy}</div><div class="wt"><b>${t("top")}</b><span>${t("top_d")}</span></div><span class="chev">${I.chev}</span></button>
-  <button class="wide glass tap" onclick="toast(t('soon_t'))" style="opacity:.75"><div class="wi">${I.game}</div><div class="wt"><b>${t("donate")}</b></div><span class="pill">${t("soon")}</span></button>`;
+  <button class="wide glass tap" onclick="go('rating')"><div class="wi">${I.trophy}</div><div class="wt"><b>${t("top")}</b><span>${t("top_d")}</span></div><span class="chev">${I.chev}</span></button>`;
 }
 
 /* ----- Рейтинг: настоящие покупки с сервера ----- */
@@ -1053,13 +1117,13 @@ function amtInput(v){ TS.amount=v; const ok=(parseInt(v)||0)>=CONFIG.minTopup, b
 function setAmt(v){ document.getElementById("tAmt").value=v; amtInput(String(v)); haptic(); }
 /* Купить сразу картой: сервер создаёт заявку с заказом внутри. После перевода — заказ и звёзды автоматически. */
 async function payDirect(o,full){
-  const qty = o.kind==="stars" ? SO.qty : PO.m;
-  const order = `${o.title} → @${o.recipient}`;
+  const qty = o.qty ?? (o.kind==="stars" ? SO.qty : PO.m);
+  const order = o.recipient ? `${o.title} → @${o.recipient}` : o.title;
   if (LIVE){
     const btn=document.getElementById(full?"cardBtn":"balBtn"), old=btn?btn.innerHTML:"";
     if(btn){ btn.disabled=true; btn.innerHTML=`<span class="spin"></span>`; }
     try{
-      const d=await api("/api/order/pay","POST",{product:o.kind,quantity:qty,recipient:o.recipient,full:!!full});
+      const d=await api("/api/order/pay","POST",{product:o.kind,quantity:qty,recipient:o.recipient||"",full:!!full});
       closeSheet(); if(!full) toast(t("pay_need")); haptic("medium");
       TS={step:"pay",method:"uzcard",amount:"",id:d.id,exact:d.exact,card:{number:d.card_number,holder:d.card_holder},order};
       payLeft=d.expires_in; liquid(()=>{ view="topup"; render(); startTimer(); });
@@ -2086,19 +2150,70 @@ function openPremium(){
 function premWho(w){ PO.who=w; openPremium(); }
 function buyPremium(mode){ const r=getRecipient(PO); if(!r) return; doBuy({kind:"premium",title:`Premium ${PO.m} ${t("months")}`,recipient:r,price:disc(CONFIG.premium[PO.m])},mode); }
 
+/* ----- PlayStation Store (Турция): код пополнения в лирах, оплата в сумах ----- */
+let PS={n:0,ok:false};
+const psnItem=n=>CONFIG.psn.find(x=>x.try===n);
+function openPsn(n){
+  haptic();
+  if (!CONFIG.psn.length){ toast(t("soon_t")); return; }
+  if (n) PS.n=n; if (!psnItem(PS.n)) PS.n=(CONFIG.psn.find(x=>x.tag==="best")||CONFIG.psn[0]).try;
+  const it=psnItem(PS.n), up=it.up, upIt=up&&psnItem(up.to);
+  const tag=x=>x.tag==="best"?`<i class="tg">${I.fire}</i>`:x.tag==="hot"?`<i class="tg">${I.trend}</i>`:"";
+  openSheet(`<div class="sh-title"><div class="ic">${I.game}</div><div><h2>PlayStation Store</h2><p>${t("psn_d")}</p></div></div>
+  <div class="psninfo">${t("psn_info")}</div>
+  <div class="lbl2">${t("psn_nom")}</div>
+  <div class="pk">${CONFIG.psn.map(x=>`<button class="tap ${x.try===PS.n?"on":""}" onclick="openPsn(${x.try})">${tag(x)}<b>${fmt(x.try)} ₺</b><span>${fmt(x.price)}</span></button>`).join("")}</div>
+  ${upIt?`<div class="upsell"><div class="nt"><i>${I.bolt}</i><span>${t("psn_up").replace("{extra}",money(disc(upIt.price)-disc(it.price))).replace(/\{to\}/g,fmt(up.to)).replace(/\{add\}/g,fmt(up.add)).replace("{alone}",money(up.alone))}</span></div>
+    <button class="btn ghost upb" style="margin-top:10px" onclick="openPsn(${up.to})">${I.up} ${t("psn_upbtn").replace("{to}",fmt(up.to)).replace("{extra}",money(disc(upIt.price)-disc(it.price)))}</button></div>`:""}
+  <div class="psnwarn nt"><i>${I.alert}</i><span>${t("psn_warn")}</span></div>
+  <button class="psnhow tap" onclick="openPsnGuide()">${t("psn_how")} <span class="chev">${I.chev}</span></button>
+  <label class="chk tap"><input type="checkbox" ${PS.ok?"checked":""} onchange="PS.ok=this.checked"> ${t("psn_region")}</label>
+  <div class="total">${fmt(PS.n)} ₺ · ${t("total")}${discTag()}<b>${money(disc(it.price))}</b></div>
+  <button class="btn" id="cardBtn" onclick="buyPsn('card')">${I.card} ${t("pay_card")}</button>
+  <button class="btn ghost" id="balBtn" style="margin-top:8px" onclick="buyPsn('bal')">${t("pay_bal")} · ${money(S.balance)}</button>`);
+}
+function openPsnGuide(){
+  haptic();
+  const st=(n,h,b)=>`<div class="gs"><b class="gn">${n}</b><div><b>${h}</b><p>${b}</p></div></div>`;
+  openSheet(`<div class="sh-title"><div class="ic">${I.game}</div><div><h2>${t("pg_title")}</h2><p>${t("pg_sub")}</p></div></div>
+  <div class="psninfo" style="margin-bottom:14px">${t("pg_intro")}</div>
+  ${st(1,t("pg_1h"),t("pg_1"))}${st(2,t("pg_2h"),t("pg_2"))}${st(3,t("pg_3h"),t("pg_3"))}${st(4,t("pg_4h"),t("pg_4"))}
+  <div class="lbl2">${t("pg_play")}</div>
+  <div class="glass card gcard"><b>PS5</b><p>${t("pg_ps5")}</p><b>PS4</b><p>${t("pg_ps4")}</p></div>
+  <div class="upsell nt" style="margin-top:14px"><i>${I.check}</i><span>${t("pg_ok")}</span></div>
+  <button class="btn ghost" style="margin-top:16px" onclick="openPsnRedeem()">${t("pr_title")}</button>
+  <button class="btn" style="margin-top:8px" onclick="openPsn()">${t("pg_back")}</button>`);
+}
+function openPsnRedeem(){
+  haptic();
+  const blk=(h,b)=>`<div class="glass card gcard" style="margin-top:10px"><b>${h}</b><p>${b}</p></div>`;
+  openSheet(`<div class="sh-title"><div class="ic">${I.game}</div><div><h2>${t("pr_title")}</h2><p>${t("pr_sub")}</p></div></div>
+  <div class="psninfo" style="margin-bottom:4px">${t("pr_intro")}</div>
+  ${blk(t("pr_web_h"),t("pr_web"))}
+  <button class="btn ghost" style="margin-top:8px" onclick="openLink('https://store.playstation.com/')">${t("pr_open")}</button>
+  ${blk("PS5",t("pr_ps5"))}${blk("PS4",t("pr_ps4"))}${blk("PlayStation App",t("pr_app"))}
+  <div class="psnwarn nt"><i>${I.alert}</i><span>${t("pr_err")}</span></div>
+  <button class="btn" style="margin-top:16px" onclick="closeSheet()">${t("pr_done")}</button>`);
+}
+function buyPsn(mode){
+  const it=psnItem(PS.n); if(!it) return;
+  if (!PS.ok){ toast(t("psn_need_region")); haptic("medium"); return; }
+  doBuy({kind:"psn",qty:it.try,title:`PlayStation Store · ${fmt(it.try)} ₺`,recipient:"",price:disc(it.price)},mode);
+}
+
 /* ----- Покупка ----- */
 async function doBuy(o,mode){
-  if (LIVE && !CONFIG.pricesReady){ toast(t("err_price")); return; }
+  if (LIVE && o.kind!=="psn" && !CONFIG.pricesReady){ toast(t("err_price")); return; }
   if (mode==="card"){ await payDirect(o,true); return; }          // вся цена картой, баланс не нужен
   if (S.balance < o.price){ await payDirect(o,false); return; }   // не хватает — доплата картой
   if (LIVE){
     const btn=document.getElementById("balBtn"), old=btn?btn.innerHTML:"";
     if(btn){ btn.disabled=true; btn.innerHTML=`<span class="spin"></span>`; }
     try{
-      const qty = o.kind==="stars" ? SO.qty : PO.m;
-      await api("/api/order","POST",{product:o.kind,quantity:qty,recipient:o.recipient});
+      const qty = o.qty ?? (o.kind==="stars" ? SO.qty : PO.m);
+      await api("/api/order","POST",{product:o.kind,quantity:qty,recipient:o.recipient||""});
       notify(); await sync();
-      openSheet(`<div class="okbig"><div class="c">${I.check}</div><h2>${t("order_ok")}</h2><p>${o.title} → @${o.recipient}<br>${t("order_hint")}</p></div>
+      openSheet(`<div class="okbig"><div class="c">${I.check}</div><h2>${t("order_ok")}</h2><p>${o.title}${o.recipient?` → @${o.recipient}`:""}<br>${o.kind==="psn"?t("psn_code"):t("order_hint")}</p></div>
         <button class="btn" style="margin-top:18px" onclick="closeSheet();go('history')">${t("orders")}</button>`);
     }catch(e){
       if(btn){ btn.disabled=false; btn.innerHTML=old; }
@@ -2111,7 +2226,7 @@ async function doBuy(o,mode){
   S.balance-=o.price; S.spent+=o.price;
   const item={...o,id:Date.now(),date:Date.now(),status:"processing"};
   S.history.push(item); save(); render(); notify();
-  openSheet(`<div class="okbig"><div class="c">${I.check}</div><h2>${t("order_ok")}</h2><p>${o.title} → @${o.recipient}<br>${t("order_hint")}</p></div>
+  openSheet(`<div class="okbig"><div class="c">${I.check}</div><h2>${t("order_ok")}</h2><p>${o.title}${o.recipient?` → @${o.recipient}`:""}<br>${o.kind==="psn"?t("psn_code"):t("order_hint")}</p></div>
     <button class="btn" style="margin-top:18px" onclick="closeSheet();go('history')">${t("orders")}</button>`);
   const after=rankIdx(S.spent);
   if (after>before) setTimeout(()=>toast(t("new_rank")+rName(after)),1200);
@@ -3062,10 +3177,10 @@ document.title=CONFIG.shopName;
 document.getElementById("splashName").textContent=CONFIG.shopName;
 /* Ссылки из бота: ...#giveaway — страница розыгрыша, ...#gwadmin — управление розыгрышами */
 const startHash=(location.hash||"").replace("#","");
-if (["giveaway","gwadmin","games","panel"].includes(startHash)) view=startHash;
+if (["giveaway","gwadmin","games","panel","topup"].includes(startHash)) view=startHash;
 initGifts(); applyTheme(); render();
 /* «Купить ещё» из бота: ...#stars / ...#premium — сразу открываем окно покупки */
-(async()=>{ await sync(); if (startHash==="stars") openStars(); else if (startHash==="premium") openPremium(); })();
+(async()=>{ await sync(); if (startHash==="stars") openStars(); else if (startHash==="premium") openPremium(); else if (startHash==="psn") openPsn(); else if (startHash==="psnguide") openPsnGuide(); else if (startHash==="psnredeem") openPsnRedeem(); })();
 onEnter(view); if(view!=="home") loadGw(true);
 setTimeout(()=>document.getElementById("splash").classList.add("hide"), S.noanim?400:1900);
 </script>
